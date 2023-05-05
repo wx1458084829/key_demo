@@ -42,7 +42,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern uint32_t time;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,7 +56,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern TIM_HandleTypeDef htim6;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -198,6 +198,25 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles TIM6 global interrupt.
+  */
+void TIM6_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_IRQn 0 */
+		
+  /* USER CODE END TIM6_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_IRQn 1 */
+//	if (__HAL_TIM_GET_FLAG( &htim6, TIM_IT_UPDATE) != RESET ) {
+//			time++;
+//			//HAL_GPIO_TogglePin(LED_1_GPIO_Port,LED_1_Pin);
+//			__HAL_TIM_CLEAR_FLAG(&htim6 , TIM_FLAG_UPDATE);
+//		}
+		//		HAL_GPIO_TogglePin(LED_1_GPIO_Port,LED_1_Pin);
+  /* USER CODE END TIM6_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 

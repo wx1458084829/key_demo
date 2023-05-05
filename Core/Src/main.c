@@ -19,6 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -43,18 +45,47 @@
 
 /* USER CODE BEGIN PV */
 
+uint32_t time = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t flag = 0;
+void key1_handle(void){
+	//普通实现	
+//		if(HAL_GPIO_ReadPin(KEY_1_GPIO_Port,KEY_1_Pin) == 0){
+//			HAL_GPIO_TogglePin(LED_1_GPIO_Port,LED_1_Pin);
+//		}
+	if(flag == 0	&& HAL_GPIO_ReadPin(KEY_1_GPIO_Port,KEY_1_Pin) == 0){
+		HAL_TIM_Base_Start_IT(&htim6);
+		flag = 1;
+		time = 0;
+	}
+	if(flag == 1 && HAL_GPIO_ReadPin(KEY_1_GPIO_Port,KEY_1_Pin) ==0&&time >= 1000 ){
+			HAL_GPIO_TogglePin(LED_1_GPIO_Port,LED_1_Pin);
+			flag = 0;
+			time = 0;
+		HAL_TIM_Base_Stop_IT(&htim6);
+	}
+	if(flag == 1 && HAL_GPIO_ReadPin(KEY_1_GPIO_Port,KEY_1_Pin) !=0){
+			flag = 0;
+			time = 0;
+		HAL_TIM_Base_Stop_IT(&htim6);
+	}
+}
 
+//回调函数，回调中断执行一段时间
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  time++;
+}
 /* USER CODE END 0 */
 
 /**
@@ -85,14 +116,26 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
+//	HAL_TIM_Base_Start_IT(&htim6);
+	//!!!必须要开启外设中断，默认全局中断已经开启
+	   /* 在中断模式下启动定时器 */
+//  HAL_TIM_Base_Start_IT(&htim6);
+//	HAL_TIM_Base_Stop_IT(&htim6);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		key1_handle();
+//		 if ( time == 1000 ) /* 1000 * 1 ms = 1s 时间到 */
+//    {
+//      time = 0;
+//			/* LED1 取反 */      
+//					HAL_GPIO_TogglePin(LED_1_GPIO_Port,LED_1_Pin); 
+//    }     
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -136,19 +179,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-
 }
 
 /* USER CODE BEGIN 4 */
